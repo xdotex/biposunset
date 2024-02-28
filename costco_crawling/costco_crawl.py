@@ -22,32 +22,41 @@ while True:
         except TimeoutException: #10초 조건 만족 안 하면 루프 종료
             break
 
-# 상세 페이지 클릭
-element = WebDriverWait(driver, 10).until(
-    EC.element_to_be_clickable((By.XPATH, '/html/body/main/div[4]/sip-content-page/div/sip-page-slot[1]/sip-product-carousel[1]/sip-product-carousel-base/div/div/sip-carousel/owl-carousel-o/div/div[1]/owl-stage/div/div/div[1]/div/sip-product-carousel-item/div/span/div[1]/a'))
-)
-element.click()
-time.sleep(3)
 
-# CSV 파일 열기
-with open('costco_event_test2.csv', 'w', newline='', encoding='utf-8') as file:
+# CSV 파일 - re
+with open('costco_event_all_test1.csv', 'w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     # CSV 파일의 헤더 작성
     writer.writerow(['Title', 'Price', 'Sale_price', 'Real_price', 'Image URL'])
 
-    # 리스트에서 타이틀, 이미지 url 가져오기
-    try:
-      title = driver.find_element(By.CSS_SELECTOR, 'h1.product-name').text
+    # 제품들 링크
+    products = driver.find_elements(By.CSS_SELECTOR, 'div.thumb a')
 
-      price = driver.find_element(By.CSS_SELECTOR, 'span.price-value span.notranslate.ng-star-inserted').text
-      sale_price = driver.find_element(By.CSS_SELECTOR, 'span.discount-value span.notranslate.ng-star-inserted').text
-      real_price = driver.find_element(By.CSS_SELECTOR, 'span.you-pay-value').text
+    # 제품별 정보 가져오기
+    for product in products:
+        # 새 탭에서 링크 열기
+        link = product.get_attribute('href')
+        driver.execute_script('window.open("{}");'.format(link))
+        driver.switch_to.window(driver.window_handles[1])
+        time.sleep(3)
 
-      img = driver.find_element(By.CSS_SELECTOR, 'img.ng-star-inserted').get_attribute('src')
+        # 정보 추출
+        try:
+            title = driver.find_element(By.CSS_SELECTOR, 'h1.product-name').text
 
-      # CSV 파일에 쓰기
-      writer.writerow([title, price, sale_price, real_price, img])
-    except Exception as e:
-        print(e)
+            price = driver.find_element(By.CSS_SELECTOR, 'span.price-value span.notranslate.ng-star-inserted').text
+            sale_price = driver.find_element(By.CSS_SELECTOR, 'span.discount-value span.notranslate.ng-star-inserted').text
+            real_price = driver.find_element(By.CSS_SELECTOR, 'span.you-pay-value').text
+
+            img = driver.find_element(By.CSS_SELECTOR, 'img.ng-star-inserted').get_attribute('src')
+
+            # CSV 파일에 쓰기
+            writer.writerow([title, price, sale_price, real_price, img])
+        except Exception as e:
+            print(e)
+        
+        # 현재 탭 닫기 및 원래 탭으로 전환
+        driver.close()
+        driver.switch_to.window(driver.window_handles[0])
 
 driver.quit()
