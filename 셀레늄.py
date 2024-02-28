@@ -66,34 +66,3 @@ with open('costco_special_discount.csv', 'w', newline= '', encoding='utf-8') as 
 
         #뒤로 가기
         driver.back()
-
-
-'''
-#product 상품명 뽑기
-product_list = driver.find_elements(By.CSS_SELECTOR, "a.lister-name.js-lister-name")
-title = []
-for i in product_list: 
-    title.append(i.text) 
-
-#product 가격 뽑기
-product_price = driver.find_elements(By.CSS_SELECTOR, "span.notranslate.ng-star-inserted")
-price_list = [] 
-for i in product_price: 
-    price_list.append(i.text)
-price = price_list[0:len(product_list)]
-
-#product img src 뽑기 
-product_image = driver.find_elements(By.CSS_SELECTOR, "img.ng-star-inserted")
-img = [] 
-for i in product_image : 
-    if "jpg" in i.get_attribute("src"):
-        img.append(i.get_attribute("src"))
-img = img[0:len(title)]
-
-#상세페이지 img src 뽑기
-
-
-#데이터 프레임 생성
-df = pd.DataFrame({'상품 제목': title, '가격': price, '이미지URL': img})
-df.to_excel('c:/Users/김민성/Desktop/코스트코/products.xlsx', index=False)
-'''
