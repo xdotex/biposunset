@@ -13,7 +13,7 @@ driver.get(url)
 time.sleep(3)
 
 # 무한 스크롤
-old_height = driver.execute_script("return document.body.scrollHeight") #스크롤을 위한 높이를 가져옵니다.
+old_height = driver.execute_script("return document.body.scrollHeight") #스크롤을 위한 높이 가져옴
 while True:
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);") #페이지 끝으로 스크롤 다운
         try:
@@ -23,7 +23,7 @@ while True:
             break
 
 
-# CSV 파일 - re
+# CSV 파일
 with open('costco_event_all_test1.csv', 'w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     # CSV 파일의 헤더 작성
@@ -48,7 +48,7 @@ with open('costco_event_all_test1.csv', 'w', newline='', encoding='utf-8') as fi
             sale_price = driver.find_element(By.CSS_SELECTOR, 'span.discount-value span.notranslate.ng-star-inserted').text
             real_price = driver.find_element(By.CSS_SELECTOR, 'span.you-pay-value').text
 
-            img = driver.find_element(By.CSS_SELECTOR, 'img.ng-star-inserted').get_attribute('src')
+            img = driver.find_element(By.CSS_SELECTOR, 'div.page-content.container.main-wrapper img.ng-star-inserted').get_attribute('src')
 
             # CSV 파일에 쓰기
             writer.writerow([title, price, sale_price, real_price, img])
