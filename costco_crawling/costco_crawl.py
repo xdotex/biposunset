@@ -27,7 +27,7 @@ while True:
 with open('costco_event_all_test1.csv', 'w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     # CSV 파일의 헤더 작성
-    writer.writerow(['판매자 상품코드', '상품명', '코스트코정가', '코스트코할인가격', '코스트코판매가격', '대표이미지', '추가이미지', '수입사', '원산지 직접입력', '상품정보제공고시 품명', '상품정보제공고시 모델명', '상품정보제공고시 인증허가사항'])
+    writer.writerow(['판매자 상품코드', '상품명', '코스트코정가', '코스트코할인가격', '코스트코판매가격', '실제표시가격','대표이미지', '추가이미지', '수입사', '원산지 직접입력', '상품정보제공고시 품명', '상품정보제공고시 모델명', '상품정보제공고시 인증허가사항', '카테고리코드'])
 
     # 제품들 링크
     products = driver.find_elements(By.CSS_SELECTOR, 'div.thumb a')
@@ -46,10 +46,12 @@ with open('costco_event_all_test1.csv', 'w', newline='', encoding='utf-8') as fi
             sell_code = 'cc#'+code
 
             product_name = driver.find_element(By.CSS_SELECTOR, 'h1.product-name').text
-
             price = driver.find_element(By.CSS_SELECTOR, 'span.price-value span.notranslate.ng-star-inserted').text
             sale_price = driver.find_element(By.CSS_SELECTOR, 'span.discount-value span.notranslate.ng-star-inserted').text
             real_price = driver.find_element(By.CSS_SELECTOR, 'span.you-pay-value').text
+
+            #최종판매가격(민성 추가)
+            sell_price = int(round(1.95*float(price.replace('원','').replace(',','')) + 2175, -2))
 
             # 이미지
             images = driver.find_elements(By.CSS_SELECTOR, 'div.page-content.container.main-wrapper sip-product-details.ng-star-inserted div.primary-image-wrapper sip-media.zoomed-image.ng-star-inserted.is-initialized img.ng-star-inserted')
@@ -77,8 +79,8 @@ with open('costco_event_all_test1.csv', 'w', newline='', encoding='utf-8') as fi
             KC = driver.find_element(By.CSS_SELECTOR, '#product_specs tr:nth-child(3) td.attrib-val p').text
 
 
-            # CSV 파일에 쓰기
-            writer.writerow([sell_code, product_name, price, sale_price, real_price, main_img, img_urls, manufacture, made_in, product_name, product_name, KC])
+            # CSV 파일에 쓰기(sell price 추가)
+            writer.writerow([sell_code, product_name, price, sale_price, real_price, sell_price, main_img, img_urls, manufacture, made_in, product_name, product_name, KC])
         except Exception as e:
             print(e)
         
