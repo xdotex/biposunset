@@ -27,7 +27,7 @@ while True:
 with open('costco_event_all_test1.csv', 'w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     # CSV 파일의 헤더 작성
-    writer.writerow(['판매자 상품코드', '상품명', '코스트코정가', '코스트코할인가격', '코스트코판매가격', '실제표시가격','대표이미지', '추가이미지', '수입사', '원산지 직접입력', '상품정보제공고시 품명', '상품정보제공고시 모델명', '상품정보제공고시 인증허가사항', '카테고리코드'])
+    writer.writerow(['판매자 상품코드', '상품명', '코스트코판매가격', '실제표시가격','대표이미지', '추가이미지', '수입사', '원산지 직접입력', '상품정보제공고시 품명', '상품정보제공고시 모델명', '상품정보제공고시 인증허가사항'])
 
     # 제품들 링크
     products = driver.find_elements(By.CSS_SELECTOR, 'div.thumb a')
@@ -46,9 +46,7 @@ with open('costco_event_all_test1.csv', 'w', newline='', encoding='utf-8') as fi
             sell_code = 'cc#'+code
 
             product_name = driver.find_element(By.CSS_SELECTOR, 'h1.product-name').text
-            price = driver.find_element(By.CSS_SELECTOR, 'span.price-value span.notranslate.ng-star-inserted').text
-            sale_price = driver.find_element(By.CSS_SELECTOR, 'span.discount-value span.notranslate.ng-star-inserted').text
-            real_price = driver.find_element(By.CSS_SELECTOR, 'span.you-pay-value').text
+            price = driver.find_element(By.CSS_SELECTOR, 'span.notranslate.ng-star-inserted').text
 
             #최종판매가격(민성 추가)
             sell_price = int(round(1.95*float(price.replace('원','').replace(',','')) + 2175, -2))
@@ -61,26 +59,29 @@ with open('costco_event_all_test1.csv', 'w', newline='', encoding='utf-8') as fi
             # 상품정보제공고시 품명 = product_name
             # 상품정보제공고시 모델명 = product_name
 
-            # 제조사/수입사, 원산지, 상품정보제공고시 인증허가사항 -- 여기부터는 실패했습니다.
-                # 스펙 속 정보 및 요소의 값 찾기
-            attributes = driver.find_elements(By.CSS_SELECTOR, 'div#product_specs td.attrib')
+            # 스펙 오픈 후 정보 업로드까지 기다리기
+            elements = driver.find_element(By.CSS_SELECTOR, 'i.costco-icons.costco-icon-plus-sign').click()
+            time.sleep(2)
 
+            # 리스트로 관리(하위 html 정보에 접근할 수 있는 방법이 있는지? ex: tr 정보를 따온 후 거기의 td에 접근하는 법)
+            attrib = driver.find_elements(By.CSS_SELECTOR, 'td.attrib')
+            attrib_val = driver.find_elements(By.CSS_SELECTOR, 'td.attrib-val')
+            spec = []
+            for idx in range(0,len(attrib)): 
+                spec.append([attrib[idx].text, attrib_val[idx].text])
             manufacture = None
             made_in = None
-            for attrib in attributes:
-                 if attrib.text == '제조자/수입자':
-                      manufacture = attrib.find_element(By.XPATH, './following-sibling::td').text
-                      break
-            for attrib in attributes:
-                 if attrib.text == '제조국 또는 원산지':
-                      made_in = attrib.find_element(By.XPATH, './following-sibling::td').text
-                      break
-
-            KC = driver.find_element(By.CSS_SELECTOR, '#product_specs tr:nth-child(3) td.attrib-val p').text
-
+            KC = None
+            for spec_list in spec:
+                 if spec_list[0] == '제조자/수입자':
+                      manufacture = spec_list[1]
+                 if spec_list[0] == '제조국 또는 원산지':
+                      made_in = spec_list[1]
+                 if spec_list[0] == 'KC 인증 정보' :
+                      KC = spec_list[1]
 
             # CSV 파일에 쓰기(sell price 추가)
-            writer.writerow([sell_code, product_name, price, sale_price, real_price, sell_price, main_img, img_urls, manufacture, made_in, product_name, product_name, KC])
+            writer.writerow([sell_code, product_name, price, sell_price, main_img, img_urls, manufacture, made_in, product_name, product_name, KC])
         except Exception as e:
             print(e)
         
