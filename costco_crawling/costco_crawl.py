@@ -36,21 +36,28 @@ while True:
 with open('costco_event_all_test1.csv', 'w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     # CSV 파일의 헤더 작성
-    writer.writerow(['판매자 상품코드', '상품명', '코스트코정가', '코스트코할인가격', '코스트코판매가격', '대표이미지', '추가이미지', '수입사', '원산지 직접입력', '상품정보제공고시 품명', '상품정보제공고시 모델명', '상품정보제공고시 인증허가사항'])
+    writer.writerow(['판매자 상품코드', '상품명', '코스트코정가', '코스트코할인가격', '코스트코판매가격', '대표이미지', '추가이미지', '상세설명', '수입사', '원산지 직접입력', '상품정보제공고시 품명', '상품정보제공고시 모델명', '상품정보제공고시 인증허가사항'])
 
     # 제품들 링크
     products = driver.find_elements(By.CSS_SELECTOR, 'div.thumb a')
 
     # 제품별 정보 가져오기
     for product in products[:3]: # 3개만 가져오도록. 나중에 변경 필요.
-        # 새 탭에서 링크 열기
+        # 새 탭에서 링크 열기 // 상세보기 버튼+스펙
         link = product.get_attribute('href')
         driver.execute_script('window.open("{}");'.format(link))
         driver.switch_to.window(driver.window_handles[1])
+
         time.sleep(3)
 
         # 정보 추출
         try:
+            variant_select = driver.find_elements(By.CSS_SELECTOR, 'select.form-control.variant-select.costco-select')
+            # 조건을 만족하는 요소가 있으면, 이 제품은 건너뛰고 탭을 닫습니다.
+            if variant_select:
+                driver.close()
+                driver.switch_to.window(driver.window_handles[0])
+                continue  # 다음 제품으로 넘어갑니다.
             code = driver.find_element(By.CSS_SELECTOR, 'p.product-code span.notranslate').text
             sell_code = 'cc#'+code
 
@@ -64,9 +71,32 @@ with open('costco_event_all_test1.csv', 'w', newline='', encoding='utf-8') as fi
             images = driver.find_elements(By.CSS_SELECTOR, 'div.page-content.container.main-wrapper sip-product-details.ng-star-inserted div.primary-image-wrapper sip-media.zoomed-image.ng-star-inserted.is-initialized img.ng-star-inserted')
             main_img = images[0].get_attribute('src')
             img_urls = '\n'.join([img.get_attribute('src') for img in images[1:]])  # 이미지 URL을 개행문자로 연결
+            
+            
+            # 상세이미지+정보 // 상세보기 버튼 클릭
+
+            driver.find_element(By.CSS_SELECTOR, "button.view-more__button.ng-star-inserted").click()
+            time.sleep(2)
+
+            #배열에 추가
+            file = driver.find_element(By.CSS_SELECTOR, "div.wrapper_itemDes")
+            try: 
+                detail = file.text
+            except: 
+                pass
+            try:  
+                detail = file.find_element(By.TAG_NAME, "img").get_attribute("src")
+            except: 
+                pass
+            
+
 
             # 상품정보제공고시 품명 = product_name
             # 상품정보제공고시 모델명 = product_name
+
+            # 스펙 오픈 후 정보 업로드까지 기다리기
+            elements = driver.find_element(By.CSS_SELECTOR, 'i.costco-icons.costco-icon-plus-sign').click()
+            time.sleep(2)
 
             # 리스트로 관리(하위 html 정보에 접근할 수 있는 방법이 있는지? ex: tr 정보를 따온 후 거기의 td에 접근하는 법)
             attrib = driver.find_elements(By.CSS_SELECTOR, 'td.attrib')
@@ -87,7 +117,7 @@ with open('costco_event_all_test1.csv', 'w', newline='', encoding='utf-8') as fi
 
 
             # CSV 파일에 쓰기
-            writer.writerow([sell_code, product_name, price, sale_price, real_price, main_img, img_urls, manufacture, made_in, product_name, product_name, KC])
+            writer.writerow([sell_code, product_name, price, sale_price, real_price, main_img, img_urls, detail, manufacture, made_in, product_name, product_name, KC])
         except Exception as e:
             print(e)
         
