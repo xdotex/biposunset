@@ -6,6 +6,15 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 import csv
+from selenium.webdriver.chrome.options import Options
+
+# User-Agent와 Accept-Language를 설정하는 Chrome 옵션
+options = Options()
+options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36")
+options.add_argument("accept-language=en-US,en;q=0.9")
+
+# WebDriver를 설정할 때 위에서 정의한 옵션을 사용합니다.
+driver = webdriver.Chrome(options=options)
 
 url = 'https://www.costco.co.kr/events'
 driver = webdriver.Chrome()
@@ -59,22 +68,22 @@ with open('costco_event_all_test1.csv', 'w', newline='', encoding='utf-8') as fi
             # 상품정보제공고시 품명 = product_name
             # 상품정보제공고시 모델명 = product_name
 
-            # 제조사/수입사, 원산지, 상품정보제공고시 인증허가사항 -- 여기부터는 실패했습니다.
-                # 스펙 속 정보 및 요소의 값 찾기
-            attributes = driver.find_elements(By.CSS_SELECTOR, 'div#product_specs td.attrib')
-
+            # 리스트로 관리(하위 html 정보에 접근할 수 있는 방법이 있는지? ex: tr 정보를 따온 후 거기의 td에 접근하는 법)
+            attrib = driver.find_elements(By.CSS_SELECTOR, 'td.attrib')
+            attrib_val = driver.find_elements(By.CSS_SELECTOR, 'td.attrib-val')
+            spec = []
+            for idx in range(0,len(attrib)): 
+                spec.append([attrib[idx].text, attrib_val[idx].text])
             manufacture = None
             made_in = None
-            for attrib in attributes:
-                 if attrib.text == '제조자/수입자':
-                      manufacture = attrib.find_element(By.XPATH, './following-sibling::td').text
-                      break
-            for attrib in attributes:
-                 if attrib.text == '제조국 또는 원산지':
-                      made_in = attrib.find_element(By.XPATH, './following-sibling::td').text
-                      break
-
-            KC = driver.find_element(By.CSS_SELECTOR, '#product_specs tr:nth-child(3) td.attrib-val p').text
+            KC = None
+            for spec_list in spec:
+                 if spec_list[0] == '제조자/수입자':
+                      manufacture = spec_list[1]
+                 if spec_list[0] == '제조국 또는 원산지':
+                      made_in = spec_list[1]
+                 if spec_list[0] == 'KC 인증 정보' :
+                      KC = spec_list[1]
 
 
             # CSV 파일에 쓰기
