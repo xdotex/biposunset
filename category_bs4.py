@@ -10,38 +10,39 @@ with open('costco_event_all_test1.csv', 'r', encoding = 'utf-8') as input_file:
     reader = csv.reader(input_file)
     headers = next(reader)  # 헤더 읽기(csv 파일의 경우 이터레이터가 행)
     headers.append('카테고리 코드')  # 새로운 열 이름 추가
-    #카테고리 코드 파일 열기
-    with open('C:/Users/김민성/Desktop/코스트코/category.csv', 'r', encoding = 'utf-8') as category_file : 
-        #행으로 work 시작
-        for row in reader:
-        #제품명 검색 후 카테고리 get
-            # 네이버 쇼핑 열기
-            url = 'https://search.shopping.naver.com/search/all?query=' + row[1].replace(' ', '%20')
-            response = requests.get(url)
-            if response.status_code == 200: 
-                html = response.text 
-                soup = BeautifulSoup(html, 'html.parser')
-                category_html = soup.select('#content > div.style_content__xWg5l > div.basicList_list_basis__uNBZx > div > div:nth-child(5) > div > div > div.product_info_area__xxCTi > div.product_depth__I4SqY > span')
-                category = [] 
-                for content in category_html : 
-                    category.append(content.text) 
-            else : 
-                print(response.status_code) 
-            #카테고리 액셀 파일에서 검색 후 카테고리 코드 찾기
+    #행으로 work 시작
+    for row in reader:
+    #제품명 검색 후 카테고리 get
+        # 네이버 쇼핑 열기
+        url = 'https://search.shopping.naver.com/search/all?query=' + row[1].replace(' ', '%20')
+        response = requests.get(url)
+        if response.status_code == 200: 
+            html = response.text 
+            soup = BeautifulSoup(html, 'html.parser')
+            category_html = soup.select('#content > div.style_content__xWg5l > div.basicList_list_basis__uNBZx > div > div:nth-child(5) > div > div > div.product_info_area__xxCTi > div.product_depth__I4SqY > span')
+            category = [] 
+            for content in category_html : 
+                category.append(content.text)
+            print(category)
+        else : 
+            print(response.status_code) 
+        #카테고리 액셀 파일에서 검색 후 카테고리 코드 찾기
+        with open('C:/Users/김민성/Desktop/코스트코/category.csv', 'r', encoding = 'utf-8') as category_file : 
             leader = csv.reader(category_file)
-            headers = next(leader)
-            line = next(leader)
-            while line != []:
+            for line in leader: 
                 if line[1:] == category : 
                     category_code = line[0]
-                    print(category_code)
-                    line = next(leader)
-            
-            ''' row.append(category_code)  # 각 행에 새로운 데이터 추가
-                rows.append(row)
+                    break
+        if category_code is not None:  # 카테고리 코드가 찾아진 경우
+            print(category_code)
+        else:  # 카테고리 코드가 없는 경우
+            print("카테고리 코드를 찾을 수 없습니다.")
+# 다시 천천히 정리해보자.
+        ''' row.append(category_code)  # 각 행에 새로운 데이터 추가
+            rows.append(row)
 
-            # 새로운 CSV 파일에 쓰기
-            with open('costco_event_all.csv', 'w', newline='') as output_file:
-                writer = csv.writer(output_file)
-                writer.writerow(headers)  # 헤더 쓰기
-                writer.writerows(rows)  # 행 데이터 쓰기'''
+        # 새로운 CSV 파일에 쓰기
+        with open('costco_event_all.csv', 'w', newline='') as output_file:
+            writer = csv.writer(output_file)
+            writer.writerow(headers)  # 헤더 쓰기
+            writer.writerows(rows)  # 행 데이터 쓰기'''
