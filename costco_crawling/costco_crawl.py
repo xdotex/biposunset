@@ -5,7 +5,16 @@ import time
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.chrome.options import Options
 import csv
+
+# User-Agent와 Accept-Language를 설정하는 Chrome 옵션
+options = Options() 
+options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36")
+options.add_argument("accept-language=en-US,en;q=0.9")
+
+# WebDriver를 설정할 때 위에서 정의한 옵션을 사용합니다.
+driver = webdriver.Chrome(options=options)
 
 url = 'https://www.costco.co.kr/events'
 driver = webdriver.Chrome()
@@ -27,7 +36,7 @@ while True:
 with open('costco_event_all_test1.csv', 'w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     # CSV 파일의 헤더 작성
-    writer.writerow(['판매자 상품코드', '상품명', '코스트코판매가격', '실제표시가격','대표이미지', '추가이미지', '수입사', '원산지 직접입력', '상품정보제공고시 품명', '상품정보제공고시 모델명', '상품정보제공고시 인증허가사항'])
+    writer.writerow(['판매자 상품코드', '카테고리 코드', '상품명', '상품상태' '판매가', '재고수량', '옵션형태', '옵션명', '옵션값', '옵션가', '옵션 재고수량', '직접입력 옵션', '추가상품명', '추가상품값', '추가상품가', '추가상품 재고수량', '대표이미지', '추가이미지', '상세설명', '브랜드', '제조사', '제조일자', '유효일자', '원산지코드', '수입사', '복수원산지여부', '원산지 직접입력', '미성년자 구매', '배송비 템플릿코드', '배송방법', '택배사코드', '배송비유형', '기본배송비', '배송비 결제방식', '조건부무료-상품판매가 합계', '수량별부과-수량', '구간별-2구간수량', '구간별-3구간수량', '구간별-3구간배송비', '구간별-추가배송비', '반품배송비', '교환배송비', '지역별 차등 배송비', '별도설치비', '상품정보제공고시 템플릿코드', '상품정보제공고시 품명', '상품정보제공고시 모델명', '상품정보제공고시 인증허가사항', '상품정보제공고시 제조자', 'A/S 템플릿코드', 'A/S 전화번호', 'A/S 안내', '판매자특이사항', '즉시할인 값(기본할인)', '즉시할인 단위(기본할인)', '모바일 즉시할인 값', '모바일 즉시할인 단위', '복수구매할인 조건 값', '복수구매할인 조건 단위', '복수구매할인 값', '복수구매할인 단위', '상품구매시 포인트 지급 값', '상품구매시 포인트 지급 단위', '텍스트리뷰 작성시 지급 포인트', '포토/동영상 리뷰 작성시 지급 포인트'])
 
     # 제품들 링크
     products = driver.find_elements(By.CSS_SELECTOR, 'div.thumb a')
@@ -81,7 +90,9 @@ with open('costco_event_all_test1.csv', 'w', newline='', encoding='utf-8') as fi
                       KC = spec_list[1]
 
             # CSV 파일에 쓰기(sell price 추가)
-            writer.writerow([sell_code, product_name, price, sell_price, main_img, img_urls, manufacture, made_in, product_name, product_name, KC])
+            //writer.writerow(['판매자 상품코드', '카테고리 코드', '상품명', '상품상태' '판매가', '부가세', '재고수량', '옵션형태', '옵션명', '옵션값', '옵션가', '옵션 재고수량', '직접입력 옵션', '추가상품명', '추가상품값', '추가상품가', '추가상품 재고수량', '대표이미지', '추가이미지', '상세설명', '브랜드', '제조사', '제조일자', '유효일자', '원산지코드', '수입사', '복수원산지여부', '원산지 직접입력', '미성년자 구매', '배송비 템플릿코드', '배송방법', '택배사코드', '배송비유형', '기본배송비', '배송비 결제방식', '조건부무료-상품판매가 합계', '수량별부과-수량', '구간별-2구간수량', '구간별-3구간수량', '구간별-3구간배송비', '구간별-추가배송비', '반품배송비', '교환배송비', '지역별 차등 배송비', '별도설치비', '상품정보제공고시 템플릿코드', '상품정보제공고시 품명', '상품정보제공고시 모델명', '상품정보제공고시 인증허가사항', '상품정보제공고시 제조자', 'A/S 템플릿코드', 'A/S 전화번호', 'A/S 안내', '판매자특이사항', '즉시할인 값(기본할인)', '즉시할인 단위(기본할인)', '모바일 즉시할인 값', '모바일 즉시할인 단위', '복수구매할인 조건 값', '복수구매할인 조건 단위', '복수구매할인 값', '복수구매할인 단위', '상품구매시 포인트 지급 값', '상품구매시 포인트 지급 단위', '텍스트리뷰 작성시 지급 포인트', '포토/동영상 리뷰 작성시 지급 포인트'])
+          
+            writer.writerow([sell_code, '', product_name, "신상품", sell_price, "과세상품", "9999", "", "", "", "", "", "", "", "", "", "", main_img, img_urls, manufacture, made_in, product_name, product_name, KC])
         except Exception as e:
             print(e)
         
